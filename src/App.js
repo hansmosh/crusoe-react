@@ -3,6 +3,7 @@ import AWS from 'aws-sdk/dist/aws-sdk-react-native'
 import logo from './logo.svg';
 import './App.css';
 import LoginController from './LoginController';
+import FavoritesSelector from './FavoritesSelector';
 
 class App extends Component {
 
@@ -22,7 +23,7 @@ class App extends Component {
     this.setState({isLoggedIn: true});
   }
 
-  handleLogout(identity) {
+  handleLogout() {
     AWS.config.credentials.clearCachedId();
     this.setState({identity: {}});
     this.setState({isLoggedIn: false});
@@ -36,8 +37,8 @@ class App extends Component {
           <h2>Welcome to Crusoe</h2>
         </div>
         <div className="App-body">
-          <LoginController isLoggedIn={this.state.isLoggedIn} handleLogin={this.handleLogin} handleLogout={this.handleLogout}/>
-          {this.state.identity.email}
+          <LoginController isLoggedIn={this.state.isLoggedIn} handleLogin={this.handleLogin} handleLogout={this.handleLogout} identity={this.state.identity}/>
+          <FavoritesSelector isLoggedIn={this.state.isLoggedIn}/>
         </div>
       </div>
     );

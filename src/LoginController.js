@@ -64,6 +64,7 @@ class LoginController extends Component {
     return (
       <div className="LoginController">
         {button}
+        {this.props.identity.email}
      </div>
     );
   }

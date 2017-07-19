@@ -9,6 +9,7 @@
     "react-dom": "^15.6.1",
     "react-google-login": "^2.9.2",
     "react-scripts": "1.0.10",
+    "react-select": "^1.0.0-rc.5",
     "react-test-renderer": "^15.6.1"
   },
   "scripts": {
