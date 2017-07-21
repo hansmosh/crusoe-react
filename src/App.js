@@ -38,7 +38,7 @@ class App extends Component {
         </div>
         <div className="App-body">
           <LoginController isLoggedIn={this.state.isLoggedIn} handleLogin={this.handleLogin} handleLogout={this.handleLogout} identity={this.state.identity}/>
-          <FavoritesSelector isLoggedIn={this.state.isLoggedIn}/>
+          <FavoritesSelector isLoggedIn={this.state.isLoggedIn} identity={this.state.identity}/>
         </div>
       </div>
     );

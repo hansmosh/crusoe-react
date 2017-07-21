@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import AWS from 'aws-sdk/dist/aws-sdk-react-native'
 import Select from 'react-select';
 import 'react-select/dist/react-select.css';
 
@@ -46,6 +47,7 @@ class FavoritesSelector extends Component {
     };
     this.logChange = this.logChange.bind(this);
     this.removeFavorite = this.removeFavorite.bind(this);
+    this.saveFavorites = this.saveFavorites.bind(this);
   }
 
   logChange(val) {
@@ -65,6 +67,33 @@ class FavoritesSelector extends Component {
     this.setState({favorites: new_favorites});
   }
 
+  sendDbRequest(req) {
+    return new Promise(function (resolve, reject) {
+      req.send(function (err, data) {
+        if (err) { reject(err); }
+        else { resolve(data); }
+      });
+    });
+  }
+
+  saveFavorites() {
+    var db = new AWS.DynamoDB.DocumentClient();
+    var item = {
+      TableName: 'crusoeFavorites',
+      Item: {
+        userId: this.props.identity.id,
+        favorites: this.state.favorites
+      }
+    };
+    this.sendDbRequest(db.put(item)).then(data => {
+      console.log("Updated favorites in database");
+    })
+    .catch(error => {
+      console.log("Failed to save favorites to database");
+      console.log(error);
+    })
+  }
+
   render() {
     var options = [
       {value: 'one', label: 'One'},
@@ -77,6 +106,7 @@ class FavoritesSelector extends Component {
           options={options}
           onChange={this.logChange}
         />
+        <button onClick={this.saveFavorites}>Save</button>
       </div>
     );
   }
