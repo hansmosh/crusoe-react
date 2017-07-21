@@ -43,11 +43,12 @@ class FavoritesSelector extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      favorites: []
+      favorites: null
     };
     this.logChange = this.logChange.bind(this);
     this.removeFavorite = this.removeFavorite.bind(this);
     this.saveFavorites = this.saveFavorites.bind(this);
+    this.fetchFavorites = this.fetchFavorites.bind(this);
   }
 
   logChange(val) {
@@ -94,12 +95,41 @@ class FavoritesSelector extends Component {
     })
   }
 
+  fetchFavorites() {
+    // fetch favorites from db and set state.
+    // if no favorites are found in the db, then init to an empty list
+    var db = new AWS.DynamoDB.DocumentClient();
+    var item = {
+      TableName: 'crusoeFavorites',
+      Key: {
+        userId: this.props.identity.id
+      }
+    };
+    this.sendDbRequest(db.get(item)).then(data => {
+      if ('Item' in data && data.Item.favorites) {
+        this.setState({favorites: data.Item.favorites});
+      } else {
+        this.setState({favorites: []});
+      }
+    })
+    .catch(error => {
+      this.setState({favorites: []});
+      console.log("Failed to fetch favorites from database");
+      console.log(error);
+    })
+  }
+
   render() {
     var options = [
       {value: 'one', label: 'One'},
       {value: 'two', label: 'Two'}
     ];
-    return (!this.props.isLoggedIn ? null : 
+    // If logged in but we haven't fetched favorites yet, do that
+    if (this.props.isLoggedIn && this.state.favorites == null) {
+      this.fetchFavorites();
+    }
+    // Only render list if we're logged in and have fetched favorites
+    return (!this.props.isLoggedIn || this.state.favorites == null ? null : 
       <div>
         <FavoritesList favorites={this.state.favorites} removeFavorite={this.removeFavorite}/>
         <Select
