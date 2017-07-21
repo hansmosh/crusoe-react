@@ -53,19 +53,24 @@ class FavoritesSelector extends Component {
 
   logChange(val) {
     let label = val["label"]
+    let new_favorites = []
     if (this.state.favorites.length >=3 ) {
-      let new_favorites = this.state.favorites.slice();
+      new_favorites = this.state.favorites.slice();
       new_favorites[2] = label;
-      this.setState({favorites: new_favorites});
     } else {
-      this.setState({favorites: this.state.favorites.concat([label])});
+      new_favorites = this.state.favorites.concat([label])
     }
+    this.setState({favorites: new_favorites}, function() {
+      this.saveFavorites();
+    });
   }
 
   removeFavorite(index) {
     let new_favorites = this.state.favorites.slice();
     new_favorites.splice(index, 1);
-    this.setState({favorites: new_favorites});
+    this.setState({favorites: new_favorites}, function() {
+      this.saveFavorites();
+    });
   }
 
   sendDbRequest(req) {
@@ -136,7 +141,6 @@ class FavoritesSelector extends Component {
           options={options}
           onChange={this.logChange}
         />
-        <button onClick={this.saveFavorites}>Save</button>
       </div>
     );
   }
