@@ -49,6 +49,8 @@ class FavoritesSelector extends Component {
     this.removeFavorite = this.removeFavorite.bind(this);
     this.saveFavorites = this.saveFavorites.bind(this);
     this.fetchFavorites = this.fetchFavorites.bind(this);
+    this.getOptions = this.getOptions.bind(this);
+    this.fetchPodcasts = this.fetchPodcasts.bind(this);
   }
 
   logChange(val) {
@@ -124,11 +126,52 @@ class FavoritesSelector extends Component {
     })
   }
 
+  fetchPodcasts(input) {
+    var db = new AWS.DynamoDB.DocumentClient();
+    var params = {
+      TableName: 'crusoeItems',
+      FilterExpression: 'contains(#n, :input)',
+      ExpressionAttributeNames: {
+        '#n': 'name'
+      },
+      ExpressionAttributeValues: {
+        ':input': input
+      }
+    };
+    var that = this;
+    return new Promise(function (resolve, reject) {
+      that.sendDbRequest(db.scan(params)).then(data => {
+        var items = [];
+        data.Items.forEach(function(item) {
+          items.push(item.name);
+        });
+        resolve(items);
+      })
+      .catch(error => {
+        console.log("Failed to fetch podcasts from database");
+        console.log(error);
+        reject(error);
+      })
+    })
+
+  }
+
+  getOptions(input, callback) {
+    this.fetchPodcasts(input).then(items => {
+      var options = [];
+      for(var i = 0; i < items.length; i++) {
+        options.push({ value: items[i], label: items[i] });
+      }
+      callback(null, {
+        options: options
+      });
+    })
+    .catch(error => {
+      console.log("Failed to get options");
+    })
+  }
+
   render() {
-    var options = [
-      {value: 'one', label: 'One'},
-      {value: 'two', label: 'Two'}
-    ];
     // If logged in but we haven't fetched favorites yet, do that
     if (this.props.isLoggedIn && this.state.favorites == null) {
       this.fetchFavorites();
@@ -137,8 +180,8 @@ class FavoritesSelector extends Component {
     return (!this.props.isLoggedIn || this.state.favorites == null ? null : 
       <div>
         <FavoritesList favorites={this.state.favorites} removeFavorite={this.removeFavorite}/>
-        <Select
-          options={options}
+        <Select.Async
+          loadOptions={this.getOptions}
           onChange={this.logChange}
         />
       </div>
