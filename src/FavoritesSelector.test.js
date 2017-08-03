@@ -5,5 +5,5 @@ import FavoritesSelector from './FavoritesSelector';
 
 it('should initialize favorites list', () => {
     const wrapper = mount(<FavoritesSelector />);
-    expect(wrapper.state('favorites')).toEqual([]);
+    expect(wrapper.state('favorites')).toEqual(null);
 });
